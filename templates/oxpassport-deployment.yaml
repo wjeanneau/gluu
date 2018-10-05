@@ -1,0 +1,77 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "gluu.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.oxpassport.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "gluu.oxpassport.fullname" . }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+    {{- if .Values.oxpassport.podAnnotations }}
+      annotations:
+{{ toYaml .Values.oxpassport.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        app: {{ template "gluu.name" . }}
+        component: "{{ .Values.oxpassport.name }}"
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "gluu.serviceAccountName.oxpassport" . }}
+{{- if .Values.oxpassport.priorityClassName }}
+      priorityClassName: "{{ .Values.oxpassport.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "gluu.name" . }}-{{ .Values.oxpassport.name }}
+          image: "{{ .Values.oxpassport.image.repository }}:{{ .Values.oxpassport.image.tag }}"
+          imagePullPolicy: "{{ .Values.oxpassport.image.pullPolicy }}"
+          args:
+          {{- range $key, $value := .Values.oxpassport.extraArgs }}
+            - --{{ $key }}={{ $value }}
+          {{- end }}
+          env:
+            - name: GLUU_CONFIG_ADAPTER
+              value: "kubernetes"
+            - name: GLUU_KUBERNETES_NAMESPACE
+              value: "infra-test"
+            - name: GLUU_OXAUTH_BACKEND
+              value: "gluu-oxauth:8080"
+            - name: GLUU_oxpassport_BACKEND
+              value: "gluu-oxpassport:8080"
+          ports:
+            - containerPort: 8090
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /passport
+              port: 8090
+            initialDelaySeconds: 25
+            periodSeconds: 25
+          livenessProbe:
+            httpGet:
+              path: /passport
+              port: 8090
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+{{ toYaml .Values.oxpassport.resources | indent 12 }}
+    {{- if .Values.oxpassport.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.oxpassport.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.oxpassport.securityContext }}
+      securityContext:
+{{ toYaml .Values.oxpassport.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.oxpassport.tolerations }}
+      tolerations:
+{{ toYaml .Values.oxpassport.tolerations | indent 8 }}
+    {{- end }}
+    {{- if .Values.oxpassport.affinity }}
+      affinity:
+{{ toYaml .Values.oxpassport.affinity | indent 8 }}
+    {{- end }}

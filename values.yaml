@@ -19,6 +19,71 @@ serviceAccounts:
   config:
     create: false
     name:
+  oxpassport:
+    create: false
+    name:
+
+oxpassport:
+  ## oxpassport container name
+  ##
+  name: oxpassport
+
+  ##  container image
+  ##
+  image:
+    repository: gluufederation/oxpassport
+    tag: latest
+    pullPolicy: Always
+
+  ## oxpassport priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Additional oxpassport container arguments
+  ##
+  extraArgs: {}
+
+  ## Node tolerations for oxpassport scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for oxpassport pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Annotations to be added to oxpassport pods
+  ##
+  podAnnotations: {}
+
+  replicaCount: 1
+
+  ## oxpassport resource requests and limits
+  ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources:
+    # limits:
+    #   cpu: 10m
+    #   memory: 32Mi
+    # requests:
+    #   cpu: 10m
+    #   memory: 32Mi
+
+  ## Security context to be added to oxpassport pods
+  ##
+  securityContext: {}
+
+  service:
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    servicePort: 8090
+    type: ClusterIP
 
 config:
   ## config container name
@@ -120,6 +185,40 @@ oxtrust:
   ##
   extraArgs: {}
 
+  ingress:
+    ## If true, oxtrust Ingress will be created
+    ##
+    enabled: true
+
+    ## oxtrust Ingress annotations
+    ##
+    annotations:
+      nginx.ingress.kubernetes.io/app-root: "/identity"
+      nginx.ingress.kubernetes.io/affinity: "cookie"
+      nginx.ingress.kubernetes.io/session-cookie-name: "route"
+      nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
+
+    ## oxtrust Ingress additional labels
+    ##
+    extraLabels: {}
+
+    ## oxtrust Ingress hostnames with optional path
+    ## Must be provided if Ingress is enabled
+    ##
+    hosts:
+      - gluu.kube.lab.ile.montreal.qc.ca
+    #   - oxtrust.domain.com
+    #   - domain.com/oxtrust
+
+    ## oxtrust Ingress TLS configuration
+    ## Secrets must be manually created in the namespace
+    ##
+    tls: []
+    #   - secretName: prometheus-alerts-tls
+    #     hosts:
+    #       - oxtrust.domain.com
+
+
   ## Node tolerations for oxtrust scheduling to nodes with taints
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
   ##
@@ -216,6 +315,39 @@ oxauth:
   ## Additional oxauth container arguments
   ##
   extraArgs: {}
+
+  ingress:
+    ## If true, oxauth Ingress will be created
+    ##
+    enabled: true
+
+    ## oxauth Ingress annotations
+    ##
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/openid-configuration /oxauth/.well-known/openid-configuration$1 break;"
+      nginx.ingress.kubernetes.io/rewrite-target: /oxauth/.well-known/openid-configuration
+
+    ## oxauth Ingress additional labels
+    ##
+    extraLabels: {}
+
+    ## oxauth Ingress hostnames with optional path
+    ## Must be provided if Ingress is enabled
+    ##
+    hosts:
+      - gluu.kube.lab.ile.montreal.qc.ca
+    #   - oxauth.domain.com
+    #   - domain.com/oxauth
+
+    ## oxauth Ingress TLS configuration
+    ## Secrets must be manually created in the namespace
+    ##
+    tls: []
+    #   - secretName: prometheus-alerts-tls
+    #     hosts:
+    #       - oxauth.domain.com
 
   ## Node tolerations for oxauth scheduling to nodes with taints
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
@@ -388,7 +520,7 @@ opendj:
 
     ## opendj data Persistent Volume size
     ##
-    size: 100Gi
+    size: 10Gi
 
     ## opendj data Persistent Volume Storage Class
     ## If defined, storageClassName: <storageClass>

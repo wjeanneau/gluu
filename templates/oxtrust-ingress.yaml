@@ -1,0 +1,38 @@
+{{- if .Values.oxtrust.ingress.enabled -}}
+{{- $releaseName := .Release.Name -}}
+{{- $serviceName := include "gluu.oxtrust.fullname" . }}
+{{- $servicePort := .Values.oxtrust.service.servicePort -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+{{- if .Values.oxtrust.ingress.annotations }}
+  annotations:
+{{ toYaml .Values.oxtrust.ingress.annotations | indent 4 }}
+{{- end }}
+  labels:
+    app: {{ template "gluu.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.oxtrust.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+{{- range $key, $value := .Values.oxtrust.ingress.extraLabels }}
+    {{ $key }}: {{ $value }}
+{{- end }}
+  name: {{ template "gluu.oxtrust.fullname" . }}
+spec:
+  rules:
+  {{- range .Values.oxtrust.ingress.hosts }}
+    {{- $url := splitList "/" . }}
+    - host: {{ first $url }}
+      http:
+        paths:
+          - path: /{{ rest $url | join "/" }}
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $servicePort }}
+  {{- end -}}
+{{- if .Values.oxtrust.ingress.tls }}
+  tls:
+{{ toYaml .Values.oxtrust.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}

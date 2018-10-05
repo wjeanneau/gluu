@@ -165,8 +165,36 @@ Create the name of the service account to use for the config component
 */}}
 {{- define "gluu.serviceAccountName.config" -}}
 {{- if .Values.serviceAccounts.config.create -}}
-    {{ default (include "gluu.config.fullname" .) .Values.serviceAccounts.oxtconfigrust.name }}
+    {{ default (include "gluu.config.fullname" .) .Values.serviceAccounts.config.name }}
 {{- else -}}
     {{ default "default" .Values.serviceAccounts.config.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a fully qualified oxpassport name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "gluu.oxpassport.fullname" -}}
+{{- if .Values.oxpassport.fullnameOverride -}}
+{{- .Values.oxpassport.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- printf "%s-%s" .Release.Name .Values.oxpassport.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s-%s" .Release.Name $name .Values.oxpassport.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the name of the service account to use for the oxpassport component
+*/}}
+{{- define "gluu.serviceAccountName.oxpassport" -}}
+{{- if .Values.serviceAccounts.oxpassport.create -}}
+    {{ default (include "gluu.oxpassport.fullname" .) .Values.serviceAccounts.oxpassport.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccounts.oxpassport.name }}
 {{- end -}}
 {{- end -}}
