@@ -1,0 +1,31 @@
+{{- if .Values.config.persistentVolume.enabled -}}
+{{- if not .Values.config.persistentVolume.existingClaim -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  {{- if .Values.config.persistentVolume.annotations }}
+  annotations:
+{{ toYaml .Values.config.persistentVolume.annotations | indent 4 }}
+  {{- end }}
+  labels:
+    app: {{ template "gluu.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.config.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "gluu.config.fullname" . }}
+spec:
+  accessModes:
+{{ toYaml .Values.config.persistentVolume.accessModes | indent 4 }}
+{{- if .Values.config.persistentVolume.storageClass }}
+{{- if (eq "-" .Values.config.persistentVolume.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.config.persistentVolume.storageClass }}"
+{{- end }}
+{{- end }}
+  resources:
+    requests:
+      storage: "{{ .Values.config.persistentVolume.size }}"
+{{- end -}}
+{{- end -}}

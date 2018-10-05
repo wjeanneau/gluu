@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.redis.service.annotations }}
+  annotations:
+{{ toYaml .Values.redis.service.annotations | indent 4}}
+{{- end }}
+  labels:
+    app: {{ template "gluu.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.redis.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+{{- if .Values.redis.service.labels }}
+{{ toYaml .Values.redis.service.labels | indent 4}}
+{{- end }}
+  name: {{ template "gluu.redis.fullname" . }}
+spec:
+{{- if .Values.redis.service.clusterIP }}
+  clusterIP: {{ .Values.redis.service.clusterIP }}
+{{- end }}
+  ports:
+    - name: redis
+      port: {{ .Values.redis.service.servicePort }}
+      protocol: TCP
+      targetPort: 6379
+  selector:
+    app: {{ template "gluu.name" . }}
+    component: "{{ .Values.redis.name }}"
+    release: {{ .Release.Name }}
+  type: "{{ .Values.redis.service.type }}"

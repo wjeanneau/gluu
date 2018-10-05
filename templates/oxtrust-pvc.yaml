@@ -1,0 +1,31 @@
+{{- if .Values.oxtrust.persistentVolume.enabled -}}
+{{- if not .Values.oxtrust.persistentVolume.existingClaim -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  {{- if .Values.oxtrust.persistentVolume.annotations }}
+  annotations:
+{{ toYaml .Values.oxtrust.persistentVolume.annotations | indent 4 }}
+  {{- end }}
+  labels:
+    app: {{ template "gluu.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.oxtrust.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "gluu.oxtrust.fullname" . }}
+spec:
+  accessModes:
+{{ toYaml .Values.oxtrust.persistentVolume.accessModes | indent 4 }}
+{{- if .Values.oxtrust.persistentVolume.storageClass }}
+{{- if (eq "-" .Values.oxtrust.persistentVolume.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.oxtrust.persistentVolume.storageClass }}"
+{{- end }}
+{{- end }}
+  resources:
+    requests:
+      storage: "{{ .Values.oxtrust.persistentVolume.size }}"
+{{- end -}}
+{{- end -}}

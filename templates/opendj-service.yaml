@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.opendj.service.annotations }}
+  annotations:
+{{ toYaml .Values.opendj.service.annotations | indent 4}}
+{{- end }}
+  labels:
+    app: {{ template "gluu.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.opendj.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+{{- if .Values.opendj.service.labels }}
+{{ toYaml .Values.opendj.service.labels | indent 4}}
+{{- end }}
+  name: {{ template "gluu.opendj.fullname" . }}
+spec:
+{{- if .Values.opendj.service.clusterIP }}
+  clusterIP: {{ .Values.opendj.service.clusterIP }}
+{{- end }}
+  ports:
+    - name: ldaps
+      port: {{ .Values.opendj.service.ldaps.servicePort }}
+      protocol: TCP
+      targetPort: 1636
+    - name: ldap
+      port: {{ .Values.opendj.service.ldap.servicePort }}
+      protocol: TCP
+      targetPort: 1389
+    - name: replication
+      port: {{ .Values.opendj.service.replication.servicePort }}
+      protocol: TCP
+      targetPort: 8989
+    - name: admin
+      port: {{ .Values.opendj.service.admin.servicePort }}
+      protocol: TCP
+      targetPort: 4444
+  selector:
+    app: {{ template "gluu.name" . }}
+    component: "{{ .Values.opendj.name }}"
+    release: {{ .Release.Name }}
+  type: "{{ .Values.opendj.service.type }}"

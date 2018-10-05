@@ -1,0 +1,31 @@
+{{- if .Values.opendj.persistentVolume.enabled -}}
+{{- if not .Values.opendj.persistentVolume.existingClaim -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  {{- if .Values.opendj.persistentVolume.annotations }}
+  annotations:
+{{ toYaml .Values.opendj.persistentVolume.annotations | indent 4 }}
+  {{- end }}
+  labels:
+    app: {{ template "gluu.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.opendj.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "gluu.opendj.fullname" . }}
+spec:
+  accessModes:
+{{ toYaml .Values.opendj.persistentVolume.accessModes | indent 4 }}
+{{- if .Values.opendj.persistentVolume.storageClass }}
+{{- if (eq "-" .Values.opendj.persistentVolume.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.opendj.persistentVolume.storageClass }}"
+{{- end }}
+{{- end }}
+  resources:
+    requests:
+      storage: "{{ .Values.opendj.persistentVolume.size }}"
+{{- end -}}
+{{- end -}}

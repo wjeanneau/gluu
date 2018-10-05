@@ -1,0 +1,8 @@
+name: gluu
+version: 0.0.1
+appVersion: 3.1.4
+description: A Helm chart for Gluu
+maintiners:
+  - name: wjeanneau
+    email: william.jeanneau@gmail.com
+apiVersion: v1

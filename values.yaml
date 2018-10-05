@@ -1,0 +1,462 @@
+rbac:
+  create: true
+
+## Define serviceAccount names for components. Defaults to component's fully qualified name.
+##
+serviceAccounts:
+  redis:
+    create: false
+    name:
+  opendj:
+    create: false
+    name:
+  oxauth:
+    create: false
+    name:
+  oxtrust:
+    create: false
+    name:
+  config:
+    create: false
+    name:
+
+config:
+  ## config container name
+  ##
+  name: config
+
+  ##  container image
+  ##
+  image:
+    repository: gluufederation/config-init
+    tag: latest
+
+  ## config restartPolicy
+  ##
+  restartPolicy: Never
+
+  ## config priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Additional config container arguments
+  ##
+  extraArgs: {}
+
+  ## Node tolerations for config scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for config pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Annotations to be added to config pods
+  ##
+  podAnnotations: {}
+
+  ## Security context to be added to config pods
+  ##
+  securityContext: {}
+
+  persistentVolume:
+    ## If true, config will create/use a Persistent Volume Claim
+    ## If false, use emptyDir
+    ##
+    enabled: true
+
+    ## config data Persistent Volume access modes
+    ## Must match those of existing PV or dynamic provisioner
+    ## Ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+    ##
+    accessModes:
+      - ReadWriteOnce
+
+    ## config data Persistent Volume Claim annotations
+    ##
+    annotations: {}
+
+    ## config data Persistent Volume existing claim name
+    ## Requires config.persistentVolume.enabled: true
+    ## If defined, PVC must be created manually before volume will be bound
+    existingClaim: ""
+
+    ## config data Persistent Volume size
+    ##
+    size: 1Gi
+
+    ## config data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+
+oxtrust:
+  ## oxtrust container name
+  ##
+  name: oxtrust
+
+  ##  container image
+  ##
+  image:
+    repository: gluufederation/oxtrust
+    tag: latest
+    pullPolicy: Always
+
+  ## oxtrust priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Additional oxtrust container arguments
+  ##
+  extraArgs: {}
+
+  ## Node tolerations for oxtrust scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for oxtrust pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Annotations to be added to oxtrust pods
+  ##
+  podAnnotations: {}
+
+  replicaCount: 1
+
+  ## oxtrust resource requests and limits
+  ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources:
+    limits:
+      #cpu: 10m
+      memory: 1536Mi
+    requests:
+      #cpu: 10m
+      memory: 1000Mi
+
+  ## Security context to be added to oxtrust pods
+  ##
+  securityContext: {}
+
+  service:
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    servicePort: 8080
+    type: ClusterIP
+
+  persistentVolume:
+    ## If true, oxtrust will create/use a Persistent Volume Claim
+    ## If false, use emptyDir
+    ##
+    enabled: true
+
+    ## oxtrust data Persistent Volume access modes
+    ## Must match those of existing PV or dynamic provisioner
+    ## Ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+    ##
+    accessModes:
+      - ReadWriteOnce
+
+    ## oxtrust data Persistent Volume Claim annotations
+    ##
+    annotations: {}
+
+    ## oxtrust data Persistent Volume existing claim name
+    ## Requires oxtrust.persistentVolume.enabled: true
+    ## If defined, PVC must be created manually before volume will be bound
+    existingClaim: ""
+
+    ## oxtrust data Persistent Volume size
+    ##
+    size: 1Gi
+
+    ## oxtrust data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+
+oxauth:
+  ## oxauth container name
+  ##
+  name: oxauth
+
+  ##  container image
+  ##
+  image:
+    repository: gluufederation/oxauth
+    tag: latest
+    pullPolicy: Always
+
+  ## oxauth priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Additional oxauth container arguments
+  ##
+  extraArgs: {}
+
+  ## Node tolerations for oxauth scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for oxauth pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Annotations to be added to oxauth pods
+  ##
+  podAnnotations: {}
+
+  replicaCount: 1
+
+  ## oxauth resource requests and limits
+  ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources:
+    limits:
+      #cpu: 10m
+      memory: 1536Mi
+    requests:
+      #cpu: 10m
+      memory: 1000Mi
+
+  ## Security context to be added to oxauth pods
+  ##
+  securityContext: {}
+
+  service:
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    servicePort: 8080
+    type: ClusterIP
+
+  persistentVolume:
+    ## If true, oxauth will create/use a Persistent Volume Claim
+    ## If false, use emptyDir
+    ##
+    enabled: true
+
+    ## oxauth data Persistent Volume access modes
+    ## Must match those of existing PV or dynamic provisioner
+    ## Ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+    ##
+    accessModes:
+      - ReadWriteOnce
+
+    ## oxauth data Persistent Volume Claim annotations
+    ##
+    annotations: {}
+
+    ## oxauth data Persistent Volume existing claim name
+    ## Requires oxauth.persistentVolume.enabled: true
+    ## If defined, PVC must be created manually before volume will be bound
+    existingClaim: ""
+
+    ## oxauth data Persistent Volume size
+    ##
+    size: 1Gi
+
+    ## oxauth data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+
+opendj:
+  ## opendj container name
+  ##
+  name: opendj
+
+  ##  container image
+  ##
+  image:
+    repository: gluufederation/opendj
+    tag: latest
+    pullPolicy: Always
+
+  ## opendj priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Additional opendj container arguments
+  ##
+  extraArgs: {}
+
+  ## Node tolerations for opendj scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for opendj pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Annotations to be added to opendj pods
+  ##
+  podAnnotations: {}
+
+  replicaCount: 1
+
+  ## opendj resource requests and limits
+  ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources: {}
+    # limits:
+    #   cpu: 10m
+    #   memory: 32Mi
+    # requests:
+    #   cpu: 10m
+    #   memory: 32Mi
+
+  ## Security context to be added to opendj pods
+  ##
+  securityContext: {}
+
+  service:
+    annotations: {}
+    labels: {}
+    #clusterIP: "None"
+    clusterIP: ""
+    ldaps:
+      servicePort: 1636
+    ldap:
+      servicePort: 1389
+    replication:
+      servicePort: 8989
+    admin:
+      servicePort: 4444
+    type: ClusterIP
+
+  persistentVolume:
+    ## If true, opendj will create/use a Persistent Volume Claim
+    ## If false, use emptyDir
+    ##
+    enabled: true
+
+    ## opendj data Persistent Volume access modes
+    ## Must match those of existing PV or dynamic provisioner
+    ## Ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+    ##
+    accessModes:
+      - ReadWriteOnce
+
+    ## opendj data Persistent Volume Claim annotations
+    ##
+    annotations: {}
+
+    ## opendj data Persistent Volume existing claim name
+    ## Requires opendj.persistentVolume.enabled: true
+    ## If defined, PVC must be created manually before volume will be bound
+    existingClaim: ""
+
+    ## opendj data Persistent Volume size
+    ##
+    size: 100Gi
+
+    ## opendj data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+
+redis:
+  ## redis container name
+  ##
+  name: redis
+
+  ## redis container image
+  ##
+  image:
+    repository: library/redis
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  ## redis priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Additional redis container arguments
+  ##
+  extraArgs: {}
+
+  ## Node tolerations for redis scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for redis pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Annotations to be added to redis pods
+  ##
+  podAnnotations: {}
+
+  replicaCount: 1
+
+  ## redis resource requests and limits
+  ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources: {}
+    # limits:
+    #   cpu: 10m
+    #   memory: 32Mi
+    # requests:
+    #   cpu: 10m
+    #   memory: 32Mi
+
+  ## Security context to be added to push-gateway pods
+  ##
+  securityContext: {}
+
+  service:
+    annotations: {}
+    labels: {}
+    clusterIP: ""
+    servicePort: 6379
+    type: ClusterIP

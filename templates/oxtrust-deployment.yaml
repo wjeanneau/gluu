@@ -1,0 +1,100 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "gluu.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.oxtrust.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "gluu.oxtrust.fullname" . }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+    {{- if .Values.oxtrust.podAnnotations }}
+      annotations:
+{{ toYaml .Values.oxtrust.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        app: {{ template "gluu.name" . }}
+        component: "{{ .Values.oxtrust.name }}"
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "gluu.serviceAccountName.oxtrust" . }}
+{{- if .Values.oxtrust.priorityClassName }}
+      priorityClassName: "{{ .Values.oxtrust.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "gluu.name" . }}-{{ .Values.oxtrust.name }}
+          image: "{{ .Values.oxtrust.image.repository }}:{{ .Values.oxtrust.image.tag }}"
+          imagePullPolicy: "{{ .Values.oxtrust.image.pullPolicy }}"
+          args:
+          {{- range $key, $value := .Values.oxtrust.extraArgs }}
+            - --{{ $key }}={{ $value }}
+          {{- end }}
+          env:
+            - name: GLUU_CONFIG_ADAPTER
+              value: "kubernetes"
+            - name: GLUU_KUBERNETES_NAMESPACE
+              value: "infra-test"
+            - name: GLUU_LDAP_URL
+              value: "gluu-opendj:1636"
+            - name: GLUU_OXAUTH_BACKEND
+              value: "gluu-oxauth:8080"
+            - name: GLUU_MAX_RAM_FRACTION
+              value: "1"
+          ports:
+            - containerPort: 8080
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /identity/restv1/scim-configuration
+              port: 8080
+            initialDelaySeconds: 25
+            periodSeconds: 25
+          livenessProbe:
+            httpGet:
+              path: /identity/restv1/scim-configuration
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+{{ toYaml .Values.oxtrust.resources | indent 12 }}
+          volumeMounts:
+            - name: oxtrust
+              mountPath: /opt/gluu/jetty/identity/logs
+              subPath: logs
+            - name: oxtrust
+              mountPath: /opt/gluu/jetty/identity/lib/ext
+              subPath: ext
+            - name: oxtrust
+              mountPath: /opt/gluu/jetty/identity/custom/static
+              subPath: static
+            - name: oxtrust
+              mountPath: opt/gluu/jetty/identity/custom/pages
+              subPath: pages
+    {{- if .Values.oxtrust.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.oxtrust.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.oxtrust.securityContext }}
+      securityContext:
+{{ toYaml .Values.oxtrust.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.oxtrust.tolerations }}
+      tolerations:
+{{ toYaml .Values.oxtrust.tolerations | indent 8 }}
+    {{- end }}
+    {{- if .Values.oxtrust.affinity }}
+      affinity:
+{{ toYaml .Values.oxtrust.affinity | indent 8 }}
+    {{- end }}
+      volumes:
+        - name: oxtrust
+        {{- if .Values.oxtrust.persistentVolume.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ if .Values.oxtrust.persistentVolume.existingClaim }}{{ .Values.oxtrust.persistentVolume.existingClaim }}{{- else }}{{ template "gluu.oxtrust.fullname" . }}{{- end }}
+        {{- else }}
+          emptyDir: {}
+        {{- end -}}

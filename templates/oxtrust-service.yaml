@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.oxtrust.service.annotations }}
+  annotations:
+{{ toYaml .Values.oxtrust.service.annotations | indent 4}}
+{{- end }}
+  labels:
+    app: {{ template "gluu.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.oxtrust.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+{{- if .Values.oxtrust.service.labels }}
+{{ toYaml .Values.oxtrust.service.labels | indent 4}}
+{{- end }}
+  name: {{ template "gluu.oxtrust.fullname" . }}
+spec:
+{{- if .Values.oxtrust.service.clusterIP }}
+  clusterIP: {{ .Values.oxtrust.service.clusterIP }}
+{{- end }}
+  ports:
+    - name: oxtrust
+      port: {{ .Values.oxtrust.service.servicePort }}
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: {{ template "gluu.name" . }}
+    component: "{{ .Values.oxtrust.name }}"
+    release: {{ .Release.Name }}
+  type: "{{ .Values.oxtrust.service.type }}"

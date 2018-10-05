@@ -1,0 +1,98 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "gluu.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.oxauth.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "gluu.oxauth.fullname" . }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+    {{- if .Values.oxauth.podAnnotations }}
+      annotations:
+{{ toYaml .Values.oxauth.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        app: {{ template "gluu.name" . }}
+        component: "{{ .Values.oxauth.name }}"
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "gluu.serviceAccountName.oxauth" . }}
+{{- if .Values.oxauth.priorityClassName }}
+      priorityClassName: "{{ .Values.oxauth.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "gluu.name" . }}-{{ .Values.oxauth.name }}
+          image: "{{ .Values.oxauth.image.repository }}:{{ .Values.oxauth.image.tag }}"
+          imagePullPolicy: "{{ .Values.oxauth.image.pullPolicy }}"
+          args:
+          {{- range $key, $value := .Values.oxauth.extraArgs }}
+            - --{{ $key }}={{ $value }}
+          {{- end }}
+          env:
+            - name: GLUU_CONFIG_ADAPTER
+              value: "kubernetes"
+            - name: GLUU_KUBERNETES_NAMESPACE
+              value: "infra-test"
+            - name: GLUU_LDAP_URL
+              value: "gluu-opendj:1636"
+            - name: GLUU_MAX_RAM_FRACTION
+              value: "1"
+          ports:
+            - containerPort: 8080
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /oxauth/.well-known/openid-configuration
+              port: 8080
+            initialDelaySeconds: 25
+            periodSeconds: 25
+          livenessProbe:
+            httpGet:
+              path: /oxauth/.well-known/openid-configuration
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+{{ toYaml .Values.oxauth.resources | indent 12 }}
+          volumeMounts:
+            - name: oxauth
+              mountPath: /opt/gluu/jetty/oxauth/logs
+              subPath: logs
+            - name: oxauth
+              mountPath: /opt/gluu/jetty/oxauth/lib/ext
+              subPath: ext
+            - name: oxauth
+              mountPath: /opt/gluu/jetty/oxauth/custom/static
+              subPath: static
+            - name: oxauth
+              mountPath: /opt/gluu/jetty/oxauth/custom/pages
+              subPath: pages
+    {{- if .Values.oxauth.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.oxauth.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.oxauth.securityContext }}
+      securityContext:
+{{ toYaml .Values.oxauth.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.oxauth.tolerations }}
+      tolerations:
+{{ toYaml .Values.oxauth.tolerations | indent 8 }}
+    {{- end }}
+    {{- if .Values.oxauth.affinity }}
+      affinity:
+{{ toYaml .Values.oxauth.affinity | indent 8 }}
+    {{- end }}
+      volumes:
+        - name: oxauth
+        {{- if .Values.oxauth.persistentVolume.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ if .Values.oxauth.persistentVolume.existingClaim }}{{ .Values.oxauth.persistentVolume.existingClaim }}{{- else }}{{ template "gluu.oxauth.fullname" . }}{{- end }}
+        {{- else }}
+          emptyDir: {}
+        {{- end -}}

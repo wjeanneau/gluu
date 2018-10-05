@@ -1,0 +1,115 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "gluu.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.opendj.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "gluu.opendj.fullname" . }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+    {{- if .Values.opendj.podAnnotations }}
+      annotations:
+{{ toYaml .Values.opendj.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        app: {{ template "gluu.name" . }}
+        component: "{{ .Values.opendj.name }}"
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "gluu.serviceAccountName.opendj" . }}
+{{- if .Values.opendj.priorityClassName }}
+      priorityClassName: "{{ .Values.opendj.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "gluu.name" . }}-{{ .Values.opendj.name }}
+          image: "{{ .Values.opendj.image.repository }}:{{ .Values.opendj.image.tag }}"
+          imagePullPolicy: "{{ .Values.opendj.image.pullPolicy }}"
+          args:
+          {{- range $key, $value := .Values.opendj.extraArgs }}
+            - --{{ $key }}={{ $value }}
+          {{- end }}
+          env:
+            - name: GLUU_CONFIG_ADAPTER
+              value: "kubernetes"
+            - name: GLUU_KUBERNETES_NAMESPACE
+              value: "infra-test"
+            - name: GLUU_LDAP_INIT
+              value: "true"
+            - name: GLUU_LDAP_INIT_HOST
+              value: "gluu-opendj"
+            - name: GLUU_LDAP_INIT_PORT
+              value: "1636"
+            - name: GLUU_OXTRUST_CONFIG_GENERATION
+              value: "true"
+            - name: GLUU_CACHE_TYPE
+              value: "REDIS"
+            - name: GLUU_REDIS_TYPE
+              value: "STANDALONE"
+            - name: GLUU_REDIS_URL
+              value: "gluu-redis:6379"
+          ports:
+            - containerPort: 1636
+              name: ldaps
+            - containerPort: 1389
+              name: ldap
+            - containerPort: 8989
+              name: replication
+            - containerPort: 4444
+              name: admin
+          readinessProbe:
+            tcpSocket:
+              port: 1636
+            initialDelaySeconds: 25
+            timeoutSeconds: 25
+          livenessProbe:
+            tcpSocket:
+              port: 1636
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+          resources:
+{{ toYaml .Values.opendj.resources | indent 12 }}
+          volumeMounts:
+            - name: opendj
+              mountPath: /opt/opendj/config
+              subPath: config
+            - name: opendj
+              mountPath: /opt/opendj/ldif
+              subPath: ldif
+            - name: opendj
+              mountPath: /opt/opendj/logs
+              subPath: logs
+            - name: opendj
+              mountPath: /opt/opendj/db
+              subPath: db
+            - name: opendj
+              mountPath: /flags
+              subPath: flags
+    {{- if .Values.opendj.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.opendj.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.opendj.securityContext }}
+      securityContext:
+{{ toYaml .Values.opendj.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.opendj.tolerations }}
+      tolerations:
+{{ toYaml .Values.opendj.tolerations | indent 8 }}
+    {{- end }}
+    {{- if .Values.opendj.affinity }}
+      affinity:
+{{ toYaml .Values.opendj.affinity | indent 8 }}
+    {{- end }}
+      volumes:
+        - name: opendj
+        {{- if .Values.opendj.persistentVolume.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ if .Values.opendj.persistentVolume.existingClaim }}{{ .Values.opendj.persistentVolume.existingClaim }}{{- else }}{{ template "gluu.opendj.fullname" . }}{{- end }}
+        {{- else }}
+          emptyDir: {}
+        {{- end -}}
