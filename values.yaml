@@ -1,5 +1,5 @@
 rbac:
-  create: true
+  create: false
 
 ## Define serviceAccount names for components. Defaults to component's fully qualified name.
 ##
@@ -193,6 +193,7 @@ oxtrust:
     ## oxtrust Ingress annotations
     ##
     annotations:
+      kubernetes.io/ingress.class: traefik
       nginx.ingress.kubernetes.io/app-root: "/identity"
       nginx.ingress.kubernetes.io/affinity: "cookie"
       nginx.ingress.kubernetes.io/session-cookie-name: "route"
@@ -206,7 +207,7 @@ oxtrust:
     ## Must be provided if Ingress is enabled
     ##
     hosts:
-      - gluu.kube.lab.ile.montreal.qc.ca
+      - gluu.solstack.com
     #   - oxtrust.domain.com
     #   - domain.com/oxtrust
 
@@ -337,7 +338,7 @@ oxauth:
     ## Must be provided if Ingress is enabled
     ##
     hosts:
-      - gluu.kube.lab.ile.montreal.qc.ca
+      - gluu.solstack.com
     #   - oxauth.domain.com
     #   - domain.com/oxauth
 
@@ -520,7 +521,7 @@ opendj:
 
     ## opendj data Persistent Volume size
     ##
-    size: 10Gi
+    size: 100Gi
 
     ## opendj data Persistent Volume Storage Class
     ## If defined, storageClassName: <storageClass>

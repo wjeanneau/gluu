@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    traefik.ingress.kubernetes.io/redirect-permanent: "true"
+    traefik.ingress.kubernetes.io/rewrite-target: /oxauth/.well-known/openid-configuration
+  labels:
+    app: gluu
+    chart: gluu-0.0.1
+    component: oxtrust-openid
+    release: gluu
+    traffic-type: main
+  name: gluu-oxauth-openid
+  namespace: infra-test
+spec:
+  rules:
+  - host: gluu.solstack.com
+    http:
+      paths:
+      - backend:
+          serviceName: gluu-oxauth
+          servicePort: 8080
+        path: /.well-known/openid-configuration
+status:
+  loadBalancer: {}
