@@ -1,3 +1,4 @@
+{{- if .Values.config.enabled -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -8,6 +9,8 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
   name: {{ template "gluu.config.fullname" . }}
+  annotations:
+    "helm.sh/hook": "pre-install"
 spec:
   template:
     metadata:
@@ -33,26 +36,10 @@ spec:
             - --{{ $key }}={{ $value }}
           {{- end }}
           env:
-            - name: GLUU_CONFIG_ADAPTER
-              value: "kubernetes"
-            - name: GLUU_KUBERNETES_NAMESPACE
-              value: "infra-test"
-            - name: ADMIN_PW
-              value: "km5d2a1x"
-            - name: EMAIL
-              value: "william.jeanneau@gmail.com"
-            - name: DOMAIN
-              value: "gluu.solstack.com"
-            - name: ORG_NAME
-              value: "Solstack, Inc"
-            - name: COUNTRY_CODE
-              value: "CA"
-            - name: STATE
-              value: "QC"
-            - name: CITY
-              value: "Montreal"
-            - name: LDAP_TYPE
-              value: "opendj"
+          {{- range $key, $value := .Values.config.extraEnv }}
+            - name: {{ $key }}
+              value: {{ $value }}
+          {{- end }}
           command: ["python", "/opt/config-init/scripts/entrypoint.py", "generate", "--admin-pw", "$(ADMIN_PW)", "--email", "$(EMAIL)", "--domain", "$(DOMAIN)", "--org-name", "$(ORG_NAME)", "--country-code", "$(COUNTRY_CODE)", "--state", "$(STATE)", "--city", "$(CITY)", "--ldap-type", "$(LDAP_TYPE)"]
           volumeMounts:
             - name: config
@@ -81,3 +68,4 @@ spec:
         {{- else }}
           emptyDir: {}
         {{- end -}}
+{{- end }}

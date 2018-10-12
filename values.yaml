@@ -1,5 +1,5 @@
 rbac:
-  create: false
+  create: true
 
 ## Define serviceAccount names for components. Defaults to component's fully qualified name.
 ##
@@ -86,6 +86,7 @@ oxpassport:
     type: ClusterIP
 
 config:
+  enabled: true
   ## config container name
   ##
   name: config
@@ -107,6 +108,22 @@ config:
   ## Additional config container arguments
   ##
   extraArgs: {}
+
+  ## Additional alertmanager container environment variable
+  ## For instance to add a http_proxy
+  ##
+  # extraEnv: {}
+  extraEnv:
+    GLUU_CONFIG_ADAPTER: "kubernetes"
+    GLUU_KUBERNETES_NAMESPACE: "infra-test"
+    ADMIN_PW: "km5d2a1x"
+    EMAIL: "william.jeanneau@gmail.com"
+    DOMAIN: "gluu.solstack.com"
+    ORG_NAME: "Solstack, Inc"
+    COUNTRY_CODE: "CA"
+    STATE: "QC"
+    CITY: "Montreal"
+    LDAP_TYPE: "opendj"
 
   ## Node tolerations for config scheduling to nodes with taints
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
@@ -134,7 +151,7 @@ config:
     ## If true, config will create/use a Persistent Volume Claim
     ## If false, use emptyDir
     ##
-    enabled: true
+    enabled: false
 
     ## config data Persistent Volume access modes
     ## Must match those of existing PV or dynamic provisioner
@@ -194,14 +211,17 @@ oxtrust:
     ##
     annotations:
       kubernetes.io/ingress.class: traefik
-      nginx.ingress.kubernetes.io/app-root: "/identity"
-      nginx.ingress.kubernetes.io/affinity: "cookie"
-      nginx.ingress.kubernetes.io/session-cookie-name: "route"
-      nginx.ingress.kubernetes.io/session-cookie-hash: "sha1"
+      traefik.ingress.kubernetes.io/redirect-entry-point: https
+      traefik.ingress.kubernetes.io/app-root: "/identity"
+      traefik.ingress.kubernetes.io/affinity: "true"
+      traefik.ingress.kubernetes.io/session-cookie-name: "route"
+      traefik.ingress.kubernetes.io/session-cookie-hash: "sha1"
+      traefik.ingress.kubernetes.io/redirect-permanent: "true"
 
     ## oxtrust Ingress additional labels
     ##
-    extraLabels: {}
+    extraLabels:
+      traffic-type: main
 
     ## oxtrust Ingress hostnames with optional path
     ## Must be provided if Ingress is enabled
@@ -325,6 +345,8 @@ oxauth:
     ## oxauth Ingress annotations
     ##
     annotations:
+      kubernetes.io/ingress.class: traefik
+      traefik.ingress.kubernetes.io/redirect-entry-point: https
       nginx.ingress.kubernetes.io/ssl-redirect: "false"
       nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
       nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/openid-configuration /oxauth/.well-known/openid-configuration$1 break;"
@@ -332,7 +354,8 @@ oxauth:
 
     ## oxauth Ingress additional labels
     ##
-    extraLabels: {}
+    extraLabels:
+      traffic-type: main
 
     ## oxauth Ingress hostnames with optional path
     ## Must be provided if Ingress is enabled
