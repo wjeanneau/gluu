@@ -84,10 +84,27 @@ spec:
       tolerations:
 {{ toYaml .Values.oxauth.tolerations | indent 8 }}
     {{- end }}
-    {{- if .Values.oxauth.affinity }}
+    {{- if eq .Values.oxauth.podAntiAffinity "hard" }}
       affinity:
-{{ toYaml .Values.oxauth.affinity | indent 8 }}
-    {{- end }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: {{ template "gluu.oxauth.fullname" . }}
+                release: {{ .Release.Name }}
+            topologyKey: kubernetes.io/hostname
+      {{- else if eq .Values.oxauth.podAntiAffinity "soft" }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: {{ template "gluu.oxauth.fullname" . }}
+                  release: {{ .Release.Name }}
+              topologyKey: kubernetes.io/hostname
+      {{- end }}
       volumes:
         - name: oxauth
         {{- if .Values.oxauth.persistentVolume.enabled }}

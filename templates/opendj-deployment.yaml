@@ -37,21 +37,28 @@ spec:
             - name: GLUU_CONFIG_ADAPTER
               value: "kubernetes"
             - name: GLUU_KUBERNETES_NAMESPACE
-              value: "infra-test"
+              value: "{{ .Release.Namespace }}"
             - name: GLUU_LDAP_INIT
               value: "true"
             - name: GLUU_LDAP_INIT_HOST
-              value: "gluu-opendj"
+              value: {{ template "gluu.opendj.fullname" . }}
             - name: GLUU_LDAP_INIT_PORT
               value: "1636"
             - name: GLUU_OXTRUST_CONFIG_GENERATION
               value: "true"
+            - name: GLUU_CERT_ALT_NAME
+              value: {{ template "gluu.opendj.fullname" . }}
+          {{- if .Values.redis.enabled }}
             - name: GLUU_CACHE_TYPE
               value: "REDIS"
             - name: GLUU_REDIS_TYPE
               value: "STANDALONE"
             - name: GLUU_REDIS_URL
-              value: "gluu-redis:6379"
+              value: {{ template "gluu.redis.fullname" . }}:6379
+          {{- else }}
+            - name: GLUU_CACHE_TYPE
+              value: "NATIVE_PERSISTENCE"
+          {{- end }}
           ports:
             - containerPort: 1636
               name: ldaps

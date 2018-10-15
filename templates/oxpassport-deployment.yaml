@@ -37,11 +37,11 @@ spec:
             - name: GLUU_CONFIG_ADAPTER
               value: "kubernetes"
             - name: GLUU_KUBERNETES_NAMESPACE
-              value: "infra-test"
+              value: "{{ .Release.Namespace }}"
             - name: GLUU_OXAUTH_BACKEND
-              value: "gluu-oxauth:8080"
-            - name: GLUU_oxpassport_BACKEND
-              value: "gluu-oxpassport:8080"
+              value: {{ template "gluu.oxauth.fullname" . }}:8080
+            - name: GLUU_OXTRUST_BACKEND
+              value: {{ template "gluu.oxtrust.fullname" . }}:8080
           ports:
             - containerPort: 8090
               name: http

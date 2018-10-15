@@ -37,11 +37,11 @@ spec:
             - name: GLUU_CONFIG_ADAPTER
               value: "kubernetes"
             - name: GLUU_KUBERNETES_NAMESPACE
-              value: "infra-test"
+              value: "{{ .Release.Namespace }}"
             - name: GLUU_LDAP_URL
-              value: "gluu-opendj:1636"
+              value: {{ template "gluu.opendj.fullname" . }}:1636
             - name: GLUU_OXAUTH_BACKEND
-              value: "gluu-oxauth:8080"
+              value: {{ template "gluu.oxauth.fullname" . }}:8080
             - name: GLUU_MAX_RAM_FRACTION
               value: "1"
           ports:

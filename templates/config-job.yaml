@@ -10,7 +10,7 @@ metadata:
     release: {{ .Release.Name }}
   name: {{ template "gluu.config.fullname" . }}
   annotations:
-    "helm.sh/hook": "pre-install"
+    "helm.sh/hook": pre-install,post-delete
 spec:
   template:
     metadata:
@@ -36,6 +36,12 @@ spec:
             - --{{ $key }}={{ $value }}
           {{- end }}
           env:
+            - name: GLUU_CONFIG_ADAPTER
+              value: "kubernetes"
+            - name: GLUU_KUBERNETES_NAMESPACE
+              value: "{{ .Release.Namespace }}"
+            - name: LDAP_TYPE
+              value: "opendj"
           {{- range $key, $value := .Values.config.extraEnv }}
             - name: {{ $key }}
               value: {{ $value }}

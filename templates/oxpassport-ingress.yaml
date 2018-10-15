@@ -1,27 +1,27 @@
-{{- if .Values.oxauth.ingress.enabled -}}
+{{- if .Values.oxpassport.ingress.enabled -}}
 {{- $releaseName := .Release.Name -}}
-{{- $serviceName := include "gluu.oxauth.fullname" . }}
-{{- $servicePort := .Values.oxauth.service.servicePort -}}
+{{- $serviceName := include "gluu.oxpassport.fullname" . }}
+{{- $servicePort := .Values.oxpassport.service.servicePort -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-{{- if .Values.oxauth.ingress.annotations }}
+{{- if .Values.oxpassport.ingress.annotations }}
   annotations:
-{{ toYaml .Values.oxauth.ingress.annotations | indent 4 }}
+{{ toYaml .Values.oxpassport.ingress.annotations | indent 4 }}
 {{- end }}
   labels:
     app: {{ template "gluu.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    component: "{{ .Values.oxauth.name }}"
+    component: "{{ .Values.oxpassport.name }}"
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
-{{- range $key, $value := .Values.oxauth.ingress.extraLabels }}
+{{- range $key, $value := .Values.oxpassport.ingress.extraLabels }}
     {{ $key }}: {{ $value }}
 {{- end }}
-  name: {{ template "gluu.oxauth.fullname" . }}
+  name: {{ template "gluu.oxpassport.fullname" . }}
 spec:
   rules:
-  {{- range .Values.oxauth.ingress.hosts }}
+  {{- range .Values.oxpassport.ingress.hosts }}
     {{- $url := splitList "/" . }}
     - host: {{ first $url }}
       http:
@@ -31,8 +31,8 @@ spec:
               serviceName: {{ $serviceName }}
               servicePort: {{ $servicePort }}
   {{- end -}}
-{{- if .Values.oxauth.ingress.tls }}
+{{- if .Values.oxpassport.ingress.tls }}
   tls:
-{{ toYaml .Values.oxauth.ingress.tls | indent 4 }}
+{{ toYaml .Values.oxpassport.ingress.tls | indent 4 }}
   {{- end -}}
 {{- end -}}

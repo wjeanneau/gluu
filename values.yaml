@@ -32,8 +32,8 @@ oxpassport:
   ##
   image:
     repository: gluufederation/oxpassport
-    tag: latest
-    pullPolicy: Always
+    tag: 3.1.4_dev
+    pullPolicy: IfNotPresent
 
   ## oxpassport priorityClassName
   ##
@@ -42,6 +42,42 @@ oxpassport:
   ## Additional oxpassport container arguments
   ##
   extraArgs: {}
+
+  ingress:
+    ## If true, oxpassport Ingress will be created
+    ##
+    enabled: true
+
+    ## oxpassport Ingress annotations
+    ##
+    annotations:
+      kubernetes.io/ingress.class: traefik
+      traefik.ingress.kubernetes.io/redirect-entry-point: https
+      traefik.ingress.kubernetes.io/affinity: "true"
+      traefik.ingress.kubernetes.io/session-cookie-name: "route"
+      traefik.ingress.kubernetes.io/session-cookie-hash: "sha1"
+      traefik.ingress.kubernetes.io/redirect-permanent: "true"
+
+    ## oxpassport Ingress additional labels
+    ##
+    extraLabels:
+      traffic-type: main
+
+    ## oxpassport Ingress hostnames with optional path
+    ## Must be provided if Ingress is enabled
+    ##
+    hosts:
+      - gluu.solstack.com/passport
+    #   - oxpassport.domain.com
+    #   - domain.com/oxpassport
+
+    ## oxpassport Ingress TLS configuration
+    ## Secrets must be manually created in the namespace
+    ##
+    tls: []
+    #   - secretName: gluu-tls
+    #     hosts:
+    #       - oxpassport.domain.com
 
   ## Node tolerations for oxpassport scheduling to nodes with taints
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
@@ -95,7 +131,8 @@ config:
   ##
   image:
     repository: gluufederation/config-init
-    tag: latest
+    tag: 3.1.4_dev
+    pullPolicy: IfNotPresent
 
   ## config restartPolicy
   ##
@@ -114,8 +151,6 @@ config:
   ##
   # extraEnv: {}
   extraEnv:
-    GLUU_CONFIG_ADAPTER: "kubernetes"
-    GLUU_KUBERNETES_NAMESPACE: "infra-test"
     ADMIN_PW: "km5d2a1x"
     EMAIL: "william.jeanneau@gmail.com"
     DOMAIN: "gluu.solstack.com"
@@ -123,7 +158,6 @@ config:
     COUNTRY_CODE: "CA"
     STATE: "QC"
     CITY: "Montreal"
-    LDAP_TYPE: "opendj"
 
   ## Node tolerations for config scheduling to nodes with taints
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
@@ -191,8 +225,8 @@ oxtrust:
   ##
   image:
     repository: gluufederation/oxtrust
-    tag: latest
-    pullPolicy: Always
+    tag: 3.1.4_dev
+    pullPolicy: IfNotPresent
 
   ## oxtrust priorityClassName
   ##
@@ -227,7 +261,7 @@ oxtrust:
     ## Must be provided if Ingress is enabled
     ##
     hosts:
-      - gluu.solstack.com
+      - gluu.solstack.com/identity
     #   - oxtrust.domain.com
     #   - domain.com/oxtrust
 
@@ -235,7 +269,7 @@ oxtrust:
     ## Secrets must be manually created in the namespace
     ##
     tls: []
-    #   - secretName: prometheus-alerts-tls
+    #   - secretName: gluu-tls
     #     hosts:
     #       - oxtrust.domain.com
 
@@ -326,8 +360,8 @@ oxauth:
   ##
   image:
     repository: gluufederation/oxauth
-    tag: latest
-    pullPolicy: Always
+    tag: 3.1.4_dev
+    pullPolicy: IfNotPresent
 
   ## oxauth priorityClassName
   ##
@@ -361,7 +395,7 @@ oxauth:
     ## Must be provided if Ingress is enabled
     ##
     hosts:
-      - gluu.solstack.com
+      - gluu.solstack.com/oxauth
     #   - oxauth.domain.com
     #   - domain.com/oxauth
 
@@ -369,7 +403,7 @@ oxauth:
     ## Secrets must be manually created in the namespace
     ##
     tls: []
-    #   - secretName: prometheus-alerts-tls
+    #   - secretName: gluu-tls
     #     hosts:
     #       - oxauth.domain.com
 
@@ -386,6 +420,10 @@ oxauth:
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
   nodeSelector: {}
+
+  ## Pod affinity
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  podAntiAffinity: soft
 
   ## Annotations to be added to oxauth pods
   ##
@@ -459,8 +497,8 @@ opendj:
   ##
   image:
     repository: gluufederation/opendj
-    tag: latest
-    pullPolicy: Always
+    tag: 3.1.4_dev
+    pullPolicy: IfNotPresent
 
   ## opendj priorityClassName
   ##
@@ -556,6 +594,7 @@ opendj:
     # storageClass: "-"
 
 redis:
+  enabled: true
   ## redis container name
   ##
   name: redis
@@ -565,7 +604,7 @@ redis:
   image:
     repository: library/redis
     tag: latest
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 
   ## redis priorityClassName
   ##
