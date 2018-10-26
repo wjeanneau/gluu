@@ -46,28 +46,26 @@ oxpassport:
   ingress:
     ## If true, oxpassport Ingress will be created
     ##
-    enabled: true
+    enabled: false
 
     ## oxpassport Ingress annotations
     ##
-    annotations:
-      kubernetes.io/ingress.class: traefik
-      traefik.ingress.kubernetes.io/redirect-entry-point: https
-      traefik.ingress.kubernetes.io/affinity: "true"
-      traefik.ingress.kubernetes.io/session-cookie-name: "route"
-      traefik.ingress.kubernetes.io/session-cookie-hash: "sha1"
-      traefik.ingress.kubernetes.io/redirect-permanent: "true"
+    annotations: {}
+      #  kubernetes.io/ingress.class: traefik
+      #  traefik.ingress.kubernetes.io/redirect-entry-point: https
+      #  traefik.ingress.kubernetes.io/affinity: "true"
+      #  traefik.ingress.kubernetes.io/session-cookie-name: "route"
+      #  traefik.ingress.kubernetes.io/session-cookie-hash: "sha1"
+      #  traefik.ingress.kubernetes.io/redirect-permanent: "true"
 
     ## oxpassport Ingress additional labels
     ##
-    extraLabels:
-      traffic-type: main
+    extraLabels: {}
 
     ## oxpassport Ingress hostnames with optional path
     ## Must be provided if Ingress is enabled
     ##
-    hosts:
-      - gluu.solstack.com/passport
+    hosts: []
     #   - oxpassport.domain.com
     #   - domain.com/oxpassport
 
@@ -146,15 +144,14 @@ config:
   ##
   extraArgs: {}
 
-  ## Additional alertmanager container environment variable
-  ## For instance to add a http_proxy
+  ## Required config container environment variable
   ##
   # extraEnv: {}
   extraEnv:
-    ADMIN_PW: "km5d2a1x"
-    EMAIL: "william.jeanneau@gmail.com"
-    DOMAIN: "gluu.solstack.com"
-    ORG_NAME: "Solstack, Inc"
+    ADMIN_PW: "changeme"
+    EMAIL: "admin@acme.local"
+    DOMAIN: "acme.local"
+    ORG_NAME: "ACME, Corp"
     COUNTRY_CODE: "CA"
     STATE: "QC"
     CITY: "Montreal"
@@ -239,29 +236,27 @@ oxtrust:
   ingress:
     ## If true, oxtrust Ingress will be created
     ##
-    enabled: true
+    enabled: false
 
     ## oxtrust Ingress annotations
     ##
-    annotations:
-      kubernetes.io/ingress.class: traefik
-      traefik.ingress.kubernetes.io/redirect-entry-point: https
-      traefik.ingress.kubernetes.io/app-root: "/identity"
-      traefik.ingress.kubernetes.io/affinity: "true"
-      traefik.ingress.kubernetes.io/session-cookie-name: "route"
-      traefik.ingress.kubernetes.io/session-cookie-hash: "sha1"
-      traefik.ingress.kubernetes.io/redirect-permanent: "true"
+    annotations: {}
+      #  kubernetes.io/ingress.class: traefik
+      #  traefik.ingress.kubernetes.io/redirect-entry-point: https
+      #  traefik.ingress.kubernetes.io/app-root: "/identity"
+      #  traefik.ingress.kubernetes.io/affinity: "true"
+      #  traefik.ingress.kubernetes.io/session-cookie-name: "route"
+      #  traefik.ingress.kubernetes.io/session-cookie-hash: "sha1"
+      #  traefik.ingress.kubernetes.io/redirect-permanent: "true"
 
     ## oxtrust Ingress additional labels
     ##
-    extraLabels:
-      traffic-type: main
+    extraLabels: {}
 
     ## oxtrust Ingress hostnames with optional path
     ## Must be provided if Ingress is enabled
     ##
-    hosts:
-      - gluu.solstack.com/identity
+    hosts []
     #   - oxtrust.domain.com
     #   - domain.com/oxtrust
 
@@ -374,28 +369,26 @@ oxauth:
   ingress:
     ## If true, oxauth Ingress will be created
     ##
-    enabled: true
+    enabled: false
 
     ## oxauth Ingress annotations
     ##
     annotations:
-      kubernetes.io/ingress.class: traefik
-      traefik.ingress.kubernetes.io/redirect-entry-point: https
-      nginx.ingress.kubernetes.io/ssl-redirect: "false"
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-      nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/openid-configuration /oxauth/.well-known/openid-configuration$1 break;"
-      nginx.ingress.kubernetes.io/rewrite-target: /oxauth/.well-known/openid-configuration
+      #  kubernetes.io/ingress.class: traefik
+      #  traefik.ingress.kubernetes.io/redirect-entry-point: https
+      #  nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      #  nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      #  nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/openid-configuration /oxauth/.well-known/openid-configuration$1 break;"
+      #  nginx.ingress.kubernetes.io/rewrite-target: /oxauth/.well-known/openid-configuration
 
     ## oxauth Ingress additional labels
     ##
-    extraLabels:
-      traffic-type: main
+    extraLabels: {}
 
     ## oxauth Ingress hostnames with optional path
     ## Must be provided if Ingress is enabled
     ##
-    hosts:
-      - gluu.solstack.com/oxauth
+    hosts: [] 
     #   - oxauth.domain.com
     #   - domain.com/oxauth
 
@@ -594,7 +587,7 @@ opendj:
     # storageClass: "-"
 
 redis:
-  enabled: true
+  enabled: false
   ## redis container name
   ##
   name: redis

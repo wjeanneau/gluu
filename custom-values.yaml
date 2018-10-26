@@ -1,0 +1,67 @@
+oxpassport:
+  ingress:
+    enabled: true
+
+    annotations:
+      kubernetes.io/ingress.class: traefik
+      traefik.ingress.kubernetes.io/redirect-entry-point: https
+      traefik.ingress.kubernetes.io/affinity: "true"
+      traefik.ingress.kubernetes.io/session-cookie-name: "route"
+      traefik.ingress.kubernetes.io/session-cookie-hash: "sha1"
+      traefik.ingress.kubernetes.io/redirect-permanent: "true"
+
+    extraLabels:
+      traffic-type: main
+
+    hosts:
+      - gluu.solstack.com/passport
+
+config:
+  extraEnv:
+    ADMIN_PW: "km5d2a1x"
+    EMAIL: "william.jeanneau@gmail.com"
+    DOMAIN: "gluu.solstack.com"
+    ORG_NAME: "Solstack, Inc"
+    COUNTRY_CODE: "CA"
+    STATE: "QC"
+    CITY: "Montreal"
+
+oxtrust:
+  ingress:
+    enabled: true
+
+    annotations:
+      kubernetes.io/ingress.class: traefik
+      traefik.ingress.kubernetes.io/redirect-entry-point: https
+      traefik.ingress.kubernetes.io/app-root: "/identity"
+      traefik.ingress.kubernetes.io/affinity: "true"
+      traefik.ingress.kubernetes.io/session-cookie-name: "route"
+      traefik.ingress.kubernetes.io/session-cookie-hash: "sha1"
+      traefik.ingress.kubernetes.io/redirect-permanent: "true"
+
+    extraLabels:
+      traffic-type: main
+
+    hosts:
+      - gluu.solstack.com/identity
+
+oxauth:
+  ingress:
+    enabled: true
+
+    annotations:
+      kubernetes.io/ingress.class: traefik
+      traefik.ingress.kubernetes.io/redirect-entry-point: https
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/openid-configuration /oxauth/.well-known/openid-configuration$1 break;"
+      nginx.ingress.kubernetes.io/rewrite-target: /oxauth/.well-known/openid-configuration
+
+    extraLabels:
+      traffic-type: main
+
+    hosts:
+      - gluu.solstack.com/oxauth
+
+redis:
+  enabled: true
